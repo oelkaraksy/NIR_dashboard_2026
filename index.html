@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Egypt — Net International Reserves</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────────────────────── -->
+<header class="header">
+  <div class="header-left">
+    <h1>Egypt — Net International Reserves Dashboard</h1>
+    <p>Central Bank of Egypt &nbsp;·&nbsp; Monthly Data &nbsp;·&nbsp; Values in USD Billions</p>
+  </div>
+  <div id="latestBadge" class="latest-badge">Latest: —</div>
+</header>
+
+<!-- ── KPI CARDS (2 × 2) ───────────────────────────────────────────────── -->
+<div class="kpi-row">
+  <div class="kpi-card nir">
+    <div class="kpi-label">Net International Reserves (NIR)</div>
+    <div class="kpi-value" id="kpi-nir">—</div>
+    <div class="kpi-unit">USD Billions</div>
+    <div id="kpi-nir-chg"></div>
+    <div id="kpi-nir-yoy"></div>
+  </div>
+  <div class="kpi-card gold">
+    <div class="kpi-label">Gold Reserves</div>
+    <div class="kpi-value" id="kpi-gold">—</div>
+    <div class="kpi-unit">USD Billions</div>
+    <div id="kpi-gold-chg"></div>
+    <div id="kpi-gold-yoy"></div>
+  </div>
+  <div class="kpi-card fx">
+    <div class="kpi-label">Foreign Currencies</div>
+    <div class="kpi-value" id="kpi-fx">—</div>
+    <div class="kpi-unit">USD Billions</div>
+    <div id="kpi-fx-chg"></div>
+    <div id="kpi-fx-yoy"></div>
+  </div>
+  <div class="kpi-card liquid">
+    <div class="kpi-label">Liquid NIR</div>
+    <div class="kpi-value" id="kpi-liquid">—</div>
+    <div class="kpi-unit">USD Billions</div>
+    <div id="kpi-liquid-chg"></div>
+    <div id="kpi-liquid-yoy"></div>
+  </div>
+</div>
+
+<!-- ── STACKED CONTENT COLUMN ──────────────────────────────────────────── -->
+<div class="content-col">
+
+  <!-- Chart 1 — NIR Historical -->
+  <div class="card">
+    <div class="card-title">
+      NIR &amp; Reserve Components — Historical Trend
+      <div class="range-tabs" id="nirTabs">
+        <button class="range-tab" onclick="setNirRange(24,this)">2Y</button>
+        <button class="range-tab active" onclick="setNirRange(60,this)">5Y</button>
+        <button class="range-tab" onclick="setNirRange(120,this)">10Y</button>
+      </div>
+    </div>
+    <div class="card-subtitle">Values in USD Billions · Stacked bars show Gold &amp; Foreign Currency composition</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(244,168,0,0.85)"></div>Gold</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(126,200,160,0.7)"></div>Foreign Currencies</div>
+      <div class="legend-item"><div class="legend-line" style="background:#0E86C8"></div>NIR</div>
+    </div>
+    <div class="chart-wrap" style="height:260px"><canvas id="nirChart"></canvas></div>
+    <div class="slider-row">
+      <span class="slider-lbl" id="nirSliderStart">—</span>
+      <input type="range" class="timeline-slider" id="nirSlider" min="0" max="100" value="0" oninput="onNirSlider(this)">
+      <span class="slider-lbl right" id="nirSliderEnd">—</span>
+    </div>
+  </div>
+
+  <!-- Chart 2 — Gold Volume & Value -->
+  <div class="card">
+    <div class="card-title">
+      Gold Volume &amp; Value
+      <div class="range-tabs" id="troyTabs">
+        <button class="range-tab" onclick="setTroyRange(24,this)">2Y</button>
+        <button class="range-tab active" onclick="setTroyRange(60,this)">5Y</button>
+        <button class="range-tab" onclick="setTroyRange(120,this)">10Y</button>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-line" style="background:#0E86C8"></div>Volume — Left Axis (metric tonnes)</div>
+      <div class="legend-item"><div class="legend-line" style="background:#F4A800"></div>Value — Right Axis (USD bn)</div>
+    </div>
+    <div class="chart-wrap" style="height:260px"><canvas id="troyChart"></canvas></div>
+    <div class="slider-row">
+      <span class="slider-lbl" id="troySliderStart">—</span>
+      <input type="range" class="timeline-slider" id="troySlider" min="0" max="100" value="0" oninput="onTroySlider(this)">
+      <span class="slider-lbl right" id="troySliderEnd">—</span>
+    </div>
+    <div class="chart-note">&#9432; Official gold volumes are reported in troy ounces. A conversion rate of 1 troy ounce = 31.1035 grams has been applied to express volumes in metric tonnes.</div>
+  </div>
+
+  <!-- Chart 3 — Composition -->
+  <div class="card">
+    <div class="card-title">
+      Composition of Egypt's International Reserves
+      <div class="range-tabs" id="goldTabs">
+        <button class="range-tab" onclick="setGoldRange(24,this)">2Y</button>
+        <button class="range-tab active" onclick="setGoldRange(60,this)">5Y</button>
+        <button class="range-tab" onclick="setGoldRange(120,this)">10Y</button>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#F4A800"></div>Gold %</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#7EC8A0"></div>Foreign Currencies &amp; SDRs %</div>
+    </div>
+    <div class="chart-wrap" style="height:260px"><canvas id="goldStackChart"></canvas></div>
+    <div class="slider-row">
+      <span class="slider-lbl" id="goldSliderStart">—</span>
+      <input type="range" class="timeline-slider" id="goldSlider" min="0" max="100" value="0" oninput="onGoldSlider(this)">
+      <span class="slider-lbl right" id="goldSliderEnd">—</span>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <div class="card">
+    <div class="card-title">Monthly Reserve Data</div>
+    <div class="card-subtitle">USD Billions &nbsp;·&nbsp; Most recent first</div>
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>NIR (bn)</th>
+            <th>Gold (bn)</th>
+            <th>FX (bn)</th>
+            <th>Liquid NIR (bn)</th>
+            <th>Gold %</th>
+            <th>Gold (in tonnes)</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div class="source-bar">
+  Source: Central Bank of Egypt (CBE) &nbsp;·&nbsp; Data updated monthly &nbsp;·&nbsp; Figures in USD Billions
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
