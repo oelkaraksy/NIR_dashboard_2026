@@ -174,20 +174,27 @@ function renderNIRChart() {
   const cfg = {
     type: 'bar',
     data: { labels, datasets: [
-      {
-        label: 'Gold',
-        data:  data.map(d => toBn(d.Gold_USD_mn)),
-        backgroundColor: 'rgba(244,168,0,0.80)',
-        stack: 'comp',
-        order: 2,
-      },
-      {
-        label: 'Foreign Currencies',
-        data:  data.map(d => toBn(d.Foreign_Currencies_USD_mn)),
-        backgroundColor: 'rgba(126,200,160,0.60)',
-        stack: 'comp',
-        order: 2,
-      },
+  {
+    label: 'Gold',
+    data:  data.map(d => toBn(d.Gold_USD_mn)),
+    backgroundColor: 'rgba(244,168,0,0.80)',
+    stack: 'comp',
+    order: 2,
+  },
+  {
+    label: 'SDRs',
+    data:  data.map(d => toBn(d.SDRs_USD_mn)),
+    backgroundColor: 'rgba(100,149,237,0.70)',
+    stack: 'comp',
+    order: 2,
+  },
+  {
+    label: 'Foreign Currencies',
+    data:  data.map(d => toBn(d.Foreign_Currencies_USD_mn)),
+    backgroundColor: 'rgba(126,200,160,0.60)',
+    stack: 'comp',
+    order: 2,
+  },
       {
         label: 'NIR',
         type:  'line',
